@@ -10,6 +10,11 @@ const (
 	FOOD = iota
 	END
 	RUN
+	LATE
+)
+const (
+	L = 0
+	R = 1
 )
 
 type edge struct { // cesta
@@ -17,10 +22,8 @@ type edge struct { // cesta
 	time  int
 }
 type place struct {
-	left   bool
-	LWhere int
-	right  bool
-	RWhere int
+	there [2]bool
+	when  int
 }
 type Wmaze struct {
 	maze   [][]edge
@@ -33,12 +36,34 @@ type retStat struct {
 }
 
 func solve(work Wmaze, decide bool, time, start int) (end, t int) {
+	// jídlo
+	if start == work.food {
+		return FOOD, time
+	}
+	// už jsem tu byl...
+	var who int
+	if decide == LEFT {
+		who = L
+	} else {
+		who = R
+	}
+	if work.before[start].there[who] {
+		return RUN, -1
+	}
+	if work.before[start].when != 0 && time >= work.before[start].when {
+		return LATE, -1
+	} else {
+		work.before[start].when = time
+	}
+	work.before[start].there[who] = true
+	// ponoření
 	var ret []retStat
 	ret = make([]retStat, len(work.maze[start]))
 	for i, next := range work.maze[start] {
 		tS, tT := solve(work, !decide, time+next.time, next.where)
 		ret[i] = retStat{tS, tT}
 	}
+	work.before[start].there[who] = false
 	for _, r := range ret {
 		if decide == LEFT {
 			var end bool
