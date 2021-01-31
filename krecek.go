@@ -1,3 +1,4 @@
+// Psáno v jazyce golang
 package main
 
 import "fmt"
@@ -41,6 +42,10 @@ func solve(work Wmaze, decide bool, time, start int) (int, int) {
 	// nají se?
 	if start == work.food {
 		return FOOD, time
+	}
+	// slepá?
+	if len(work.maze[start]) == 0 {
+		return END, -1
 	}
 	// už tu byl...
 	var who int
